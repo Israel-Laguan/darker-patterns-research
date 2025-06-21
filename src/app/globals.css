@@ -103,7 +103,7 @@
   --background: var(--color-dark-bg-primary);
   --foreground: var(--color-dark-text-primary);
 
-  --card: oklch(0.147 0.019 288.75);
+  --card: var(--color-dark-bg-secondary);
   --card-foreground: var(--color-dark-text-primary);
 
   --popover: oklch(0.147 0.019 288.75);

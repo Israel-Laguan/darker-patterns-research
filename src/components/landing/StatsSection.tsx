@@ -1,8 +1,8 @@
 // components/landing/StatsSection.tsx
+import StatCard from '@/components/common/StatCard';
 import { getCachedStats } from '@/lib/landing/database';
 import { Timestamp } from 'firebase/firestore';
-import { CheckCircle, TrendingUp, Users, Zap } from 'lucide-react';
-import StatCard from '@/components/common/StatCard';
+import { CheckCircle, Clock, TrendingUp, Zap } from 'lucide-react';
 
 const StatsSection = async () => {
   const statsData = await getCachedStats();
@@ -15,27 +15,47 @@ const StatsSection = async () => {
 
   const statsToDisplay = [
     {
-      title: 'Participants Engaged',
-      value: statsData?.totalParticipants?.toLocaleString() ?? 'N/A',
-      icon: <Users size={24} />,
-      changeText: `Updated: ${lastUpdatedDate.toLocaleDateString()}`,
+      title: 'Agreement Rate',
+      value: statsData?.agreementRate ?? 0,
+      unit: '%',
+      icon: <CheckCircle size={24} />,
+      changeColor:
+        Number(statsData?.agreementRate) > 60
+          ? 'text-green-500'
+          : Number(statsData?.agreementRate) >= 30
+            ? 'text-yellow-500'
+            : 'text-red-500',
+      changeText: `${statsData?.totalAgreementCount}/${statsData?.totalEvaluationsSubmitted}`,
     },
     {
       title: 'Evaluations Submitted',
       value: statsData?.totalEvaluationsSubmitted?.toLocaleString() ?? 'N/A',
-      icon: <CheckCircle size={24} />,
-    },
-    {
-      title: 'Avg. Survey Completion',
-      value: statsData?.averageCompletionRate ?? 0,
-      unit: '%',
       icon: <TrendingUp size={24} />,
-      changeColor: 'text-green-500',
+      changeColor:
+        Number(statsData?.usersWithEmailAddressCount) > 50
+          ? 'text-green-500'
+          : Number(statsData?.usersWithEmailAddressCount) >= 10
+            ? 'text-yellow-500'
+            : 'text-red-500',
+      changeText: `Participants Subscribed: ${statsData?.usersWithEmailAddressCount}`,
     },
     {
-      title: 'AI Models Impacted',
-      value: `${statsData?.modelsImpacted ?? 0}+`,
+      title: 'Fully Reviewed Entries',
+      value: `${statsData?.fullyReviewedEntriesCount ?? 0}/700`,
       icon: <Zap size={24} />,
+      changeText: `Updated: ${lastUpdatedDate.toLocaleDateString()}`,
+    },
+    {
+      title: 'Average Time per Evaluation',
+      value: `${Number(statsData?.averageTimePerEvaluationMs ?? 0) / 1000} s`,
+      icon: <Clock size={24} />,
+      changeColor:
+        Number(statsData?.averageTimePerEvaluationMs ?? 0) > 60 * 1000
+          ? 'text-green-500'
+          : Number(statsData?.averageTimePerEvaluationMs ?? 0) >= 30 * 1000
+            ? 'text-yellow-500'
+            : 'text-red-500',
+      changeText: Number(statsData?.averageTimePerEvaluationMs ?? 0) > 60 * 1000 ? 'Fast Pace' : 'Slow Pace',
     },
   ];
 

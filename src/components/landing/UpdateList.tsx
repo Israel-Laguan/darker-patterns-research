@@ -33,20 +33,11 @@ const UpdateList: React.FC<UpdateListProps> = ({ updates }) => {
       <div className="space-y-8 sm:space-y-10">
         {displayedUpdates.map((update, index) => {
           const IconComponent = update.iconName ? iconMap[update.iconName] || iconMap['default'] : iconMap['default'];
-          // Date formatting is now expected to be done before passing to this component
-          // or we can do it here if we pass the raw date
-          const dateObject = 'toDate' in update.date ? update.date.toDate() : new Date(update.date.seconds * 1000);
-          const formattedDate = dateObject.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          });
-
           return (
             <UpdateItem
               key={update.id || update.title}
               title={update.title}
-              date={formattedDate}
+              date={update.date}
               description={update.description}
               icon={<IconComponent size={14} />}
               animationDelay={`${index * 100}ms`}

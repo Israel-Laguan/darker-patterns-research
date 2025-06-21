@@ -1,7 +1,8 @@
 import type { DPOEntry } from './dpo';
 
-export interface DisplayEntry extends DPOEntry {
+export interface DisplayEntry extends Omit<DPOEntry, 'date'> {
   id: string;
+  date: string;
   reviewProgress?: number;
   statusText?: string;
 }

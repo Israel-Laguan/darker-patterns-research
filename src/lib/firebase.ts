@@ -18,33 +18,27 @@ let auth: Auth | null = null;
 let db: Firestore | null = null;
 let functionsInstance: Functions | null = null;
 
-if (process.env.NODE_ENV !== 'test') {
-  if (firebaseConfig.apiKey && firebaseConfig.projectId) {
-    if (!getApps().length) {
-      app = initializeApp(firebaseConfig);
-    } else {
-      app = getApp();
-    }
-    auth = getAuth(app);
-    db = getFirestore(app);
-    if (app) {
-      functionsInstance = getFunctions(app, 'us-central1'); // Initialize functions, specify region
-    } else {
-      console.error('Firebase app not initialized, cannot initialize Functions.');
-    }
+if (firebaseConfig.apiKey && firebaseConfig.projectId) {
+  if (!getApps().length) {
+    app = initializeApp(firebaseConfig);
   } else {
-    console.error(
-      'Firebase initialization skipped: Missing NEXT_PUBLIC_FIREBASE_API_KEY or NEXT_PUBLIC_FIREBASE_PROJECT_ID in environment variables.',
-      'Ensure these are set in your .env.local file and you have restarted the development server.',
-      'Current API Key (should not be undefined/empty):',
-      firebaseConfig.apiKey ? '********' : firebaseConfig.apiKey,
-      'Current Project ID (should not be undefined/empty):',
-      firebaseConfig.projectId,
-    );
+    app = getApp();
+  }
+  auth = getAuth(app);
+  db = getFirestore(app);
+  if (app) {
+    functionsInstance = getFunctions(app, 'us-central1'); // Initialize functions, specify region
+  } else {
+    console.error('Firebase app not initialized, cannot initialize Functions.');
   }
 } else {
-  console.warn(
-    'APPLICATION IS RUNNING IN TEST MODE - FIREBASE IS NOT INITIALIZED. API calls will use mock data or fail if not mocked.',
+  console.error(
+    'Firebase initialization skipped: Missing NEXT_PUBLIC_FIREBASE_API_KEY or NEXT_PUBLIC_FIREBASE_PROJECT_ID in environment variables.',
+    'Ensure these are set in your .env.local file and you have restarted the development server.',
+    'Current API Key (should not be undefined/empty):',
+    firebaseConfig.apiKey ? '********' : firebaseConfig.apiKey,
+    'Current Project ID (should not be undefined/empty):',
+    firebaseConfig.projectId,
   );
 }
 

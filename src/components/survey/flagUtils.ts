@@ -29,12 +29,6 @@ export async function submitFlagForEntry({
     onFinally?.();
     return;
   }
-  if (process.env.NODE_ENV === 'test') {
-    alert('Flagging is currently simulated. Your feedback is noted.');
-    onSuccess?.();
-    onFinally?.();
-    return;
-  }
 
   try {
     await submitFlag({

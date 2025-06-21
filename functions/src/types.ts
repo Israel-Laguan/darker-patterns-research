@@ -81,6 +81,16 @@ export interface AdminSettingsData {
   lastUpdatedAt?: FirebaseAdminTimestamp;
 }
 
+export interface OverviewStats {
+  totalEvaluations: number;
+  totalEntriesInDataset: number;
+  agreementRate: number;
+  fullyReviewedEntriesCount: number;
+  totalAnnotatedEntries: number;
+  totalEntriesWithUnresolvedFlags: number;
+  lastUpdatedAt: FirebaseAdminTimestamp;
+}
+
 export interface LandingUpdate {
   id: string;
   title: string;
@@ -119,7 +129,21 @@ export interface ActivityLogItemFc {
 // Types for Entry Details, mirroring src/types/entryDetails.ts
 // Dummy interfaces for optional fields in EntryWithDetails
 export type DemographicsSummary = Record<string, never>;
-export type ResponseAggregates = Record<string, never>;
+export interface ResponseAggregates {
+  ratingDistribution?: {
+    '1_star'?: number;
+    '2_star'?: number;
+    '3_star'?: number;
+    '4_star'?: number;
+    '5_star'?: number;
+  };
+  commentSubmissions?: number;
+  commentSubmissionRatePercent?: number;
+  overallAnnotationPercent?: number;
+  min10ReviewsPercent?: number;
+  unresolvedFlagsPercent?: number;
+  lastUpdatedAt?: FirebaseAdminTimestamp;
+}
 
 export interface EntryAnalytics {
   views: number;

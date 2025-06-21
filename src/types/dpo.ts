@@ -18,6 +18,7 @@ export interface DPOEntry {
   targetReviewCount?: number;
   lastReviewedAt?: Timestamp | Date;
   createdAt?: Timestamp | Date;
+  date: Timestamp | Date;
   isFlaggedCount?: number;
   lastFlaggedAt?: Timestamp | Date;
 

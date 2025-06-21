@@ -16,6 +16,7 @@ export async function generateDummyEntries(count: number): Promise<DPOEntry[]> {
     categories: [i % 3 === 0 ? 'Obscuring Information' : i % 3 === 1 ? 'Misleading Content' : 'Privacy Harm'],
     discussion: `Expert discussion for entry ${i + 1}, explaining the rationale for the preferred response.`,
     reviewCount: Math.floor(Math.random() * 5),
+    date: new Date(),
   }));
 }
 

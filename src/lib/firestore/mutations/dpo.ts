@@ -1,7 +1,7 @@
-import { addDoc, collection, doc, increment, runTransaction, serverTimestamp, updateDoc } from 'firebase/firestore';
-import { httpsCallable } from 'firebase/functions';
 import { db, functions } from '@/lib/firebase';
 import type { DPOEntry, ParticipantFlag } from '@/types/dpo';
+import { addDoc, collection, doc, increment, runTransaction, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 
 export const addDPOEntry = async (entry: Omit<DPOEntry, 'id'>) => {
   if (!db) {

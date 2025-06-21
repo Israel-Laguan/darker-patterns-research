@@ -7,7 +7,7 @@ import LandingProgressBar from './LandingProgressBar';
 
 const mockProgressData = [
   { label: 'Overall Dataset Annotation', percentage: 75, colorClass: 'bg-brand-purple-500' },
-  { label: 'Ethics & Safety Review Coverage', percentage: 90, colorClass: 'bg-accent-cyan' },
+  { label: 'Entries without Unresolved Flags', percentage: 90, colorClass: 'bg-accent-cyan' },
   { label: 'Min. 10 Reviews per Entry Target', percentage: 60, colorClass: 'bg-accent-pink' },
 ];
 

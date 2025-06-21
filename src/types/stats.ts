@@ -10,6 +10,8 @@ export interface OverviewStats {
   participantFlagCount?: number; // Total flags across all entries
   totalAgreementCount?: number; // Sum of evaluations where user choice matched DPO accepted
   agreementRate?: number; // Percentage, e.g., 75 for 75%
+  totalAnnotatedEntries?: number;
+  totalEntriesWithUnresolvedFlags?: number;
   lastEvaluationAt?: Timestamp;
   lastUpdatedAt?: Timestamp;
 }
@@ -39,6 +41,9 @@ export interface ResponseAggregates {
   };
   commentSubmissions?: number; // Total count of evaluations with comments
   commentSubmissionRatePercent?: number; // Percentage
+  overallAnnotationPercent?: number;
+  min10ReviewsPercent?: number;
+  unresolvedFlagsPercent?: number;
   lastUpdatedAt?: Timestamp;
 }
 
@@ -73,9 +78,13 @@ export interface ActivityLogItem {
 }
 
 export interface LandingStats {
-  totalParticipants?: number;
-  totalEvaluationsSubmitted?: number;
-  averageCompletionRate?: number;
-  modelsImpacted?: number;
+  agreementRate?: number;
+  averageTimePerEvaluationMs?: number;
+  evaluationsCountForAvg?: number;
+  fullyReviewedEntriesCount?: number;
+  lastEvaluationAt?: Timestamp | { seconds: number; nanoseconds: number };
   lastUpdatedAt?: Timestamp | { seconds: number; nanoseconds: number };
+  totalAgreementCount?: number;
+  totalEvaluationsSubmitted?: number;
+  usersWithEmailAddressCount?: number;
 }

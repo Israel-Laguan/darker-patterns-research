@@ -1,17 +1,20 @@
 'use client';
 
-import { AuthCard } from '@/components/auth/AuthCard';
-import { SignupFormFields } from '@/components/auth/SignupFormFields';
-import { LoadingScreen } from '@/components/ui/loading';
-import { useAuth } from '@/hooks/useAuth';
-import { createUserAccount, getFirebaseErrorMessage } from '@/lib/auth/signup';
-import { signupSchema, type SignupFormValues } from '@/lib/validations/signup';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ShieldUserIcon, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+
+import { AuthCard } from '@/components/auth/AuthCard';
+import { Button } from '@/components/ui/button';
+import { LoadingScreen } from '@/components/ui/loading';
+import { useAuth } from '@/hooks/useAuth';
+import { createUserAccount, getFirebaseErrorMessage } from '@/lib/auth/signup';
+import { signupSchema, type SignupFormValues } from '@/lib/validations/signup';
+import { SignupFormFields } from './SignupFormFields';
 
 export function SignupForm() {
   const router = useRouter();
@@ -63,8 +66,25 @@ export function SignupForm() {
   );
 
   return (
-    <AuthCard title="Create Account" description="Join us to start validating dark patterns." footer={footer}>
-      <SignupFormFields form={form} onSubmit={onSubmit} isSubmitting={isSubmitting} />
+    <AuthCard
+      title="Create Account"
+      description="Join us to start validating dark patterns."
+      logo={<ShieldUserIcon className="text-brand-purple-500 mx-auto h-10 w-10" />}
+      footer={footer}
+      maxWidth="sm"
+    >
+      <div className="space-y-6 transition-colors duration-200">
+        <SignupFormFields form={form} onSubmit={onSubmit} />
+        <Button
+          type="submit"
+          onClick={form.handleSubmit(onSubmit)}
+          className="btn-base btn-primary-dark w-full justify-center"
+          disabled={isSubmitting}
+        >
+          <UserPlus className="mr-2 h-4 w-4 text-current" />
+          {isSubmitting ? 'Creating Account...' : 'Create Account'}
+        </Button>
+      </div>
     </AuthCard>
   );
 }

@@ -2,7 +2,7 @@ import * as admin from 'firebase-admin';
 import type { Timestamp as FirebaseAdminTimestamp } from 'firebase-admin/firestore';
 import * as functions from 'firebase-functions/v2';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
-import type { AdminSettingsData, DPOEntry, EvaluationData } from '../types';
+import type { AdminSettingsData, DPOEntry, EvaluationData, ResponseAggregates } from '../types';
 
 if (admin.apps.length === 0) {
   admin.initializeApp();
@@ -107,8 +107,9 @@ export const onNewEvaluationUpdateStats = onDocumentCreated('evaluations/{evalua
           ratingDistribution: newRatingDistribution,
           commentSubmissions: commentSubmissions,
           commentSubmissionRatePercent: parseFloat(newCommentRate.toFixed(1)),
+
           lastUpdatedAt: admin.firestore.FieldValue.serverTimestamp() as FirebaseAdminTimestamp,
-        },
+        } as ResponseAggregates,
         { merge: true },
       );
 

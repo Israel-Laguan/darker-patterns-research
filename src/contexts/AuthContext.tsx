@@ -18,20 +18,6 @@ interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-function getMockAuthState() {
-  // This mock is intentionally cast as AppUser for testing purposes.
-  const mockUser = {
-    uid: 'test-user-uid',
-    email: 'test@example.com',
-    displayName: 'Test Admin User',
-    roles: ['admin', 'researcher'],
-    photoURL: 'https://placehold.co/100x100.png',
-    createdAt: new Date().toISOString(),
-    lastLoginAt: new Date().toISOString(),
-  } as AppUser;
-  return { mockUser };
-}
-
 function getRoleFlags(roles: string[] | undefined) {
   const isAdmin = !!roles?.includes('admin');
   const isResearcher = !!roles?.includes('researcher') || isAdmin;
@@ -74,18 +60,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (process.env.NODE_ENV === 'test') {
-      const { mockUser } = getMockAuthState();
-      setUser(mockUser);
-      const { isAdmin, isResearcher } = getRoleFlags(mockUser.roles);
-      setIsAdmin(isAdmin);
-      setIsResearcher(isResearcher);
-      setLoading(false);
-      return;
-    }
-
     if (!auth || !db) {
       console.warn('AuthContext: Firebase auth or db is not initialized.');
+
       setLoading(false);
       return;
     }
@@ -98,13 +75,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const logout = async () => {
-    if (process.env.NODE_ENV === 'test') {
-      setUser(null);
-      setIsAdmin(false);
-      setIsResearcher(false);
-      setLoading(false);
-      return;
-    }
     if (auth) {
       await signOut(auth);
     } else {

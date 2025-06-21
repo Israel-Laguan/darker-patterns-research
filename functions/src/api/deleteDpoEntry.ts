@@ -2,7 +2,7 @@ import * as admin from 'firebase-admin';
 import type { Timestamp as FirebaseAdminTimestamp } from 'firebase-admin/firestore';
 import * as functions from 'firebase-functions/v2';
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
-import type { ActivityLogItemFc, AdminSettingsData, DPOEntry } from '../types';
+import type { ActivityLogItemFc } from '../types';
 
 if (admin.apps.length === 0) {
   admin.initializeApp();
@@ -29,7 +29,6 @@ export const deleteDpoEntry = onCall(async (request) => {
   const entryRef = db.doc(`dpo_entries/${entryId}`);
   const evaluationsRef = db.collection('evaluations').where('dpoEntryId', '==', entryId);
   const flagsRef = db.collection(`dpo_entries/${entryId}/participant_flags`);
-  const overviewStatsRef = db.doc('cached_statistics/overview_stats');
 
   try {
     await db.runTransaction(async (transaction) => {
@@ -37,8 +36,6 @@ export const deleteDpoEntry = onCall(async (request) => {
       if (!entryDoc.exists) {
         throw new HttpsError('not-found', `DPO entry with ID ${entryId} not found.`);
       }
-
-      const entryData = entryDoc.data() as DPOEntry;
 
       // 2. Cascade Deletion
       const evaluationsSnapshot = await evaluationsRef.get();
@@ -54,24 +51,6 @@ export const deleteDpoEntry = onCall(async (request) => {
       transaction.delete(entryRef);
 
       // 3. Update Statistics
-      const overviewStatsDoc = await transaction.get(overviewStatsRef);
-      const currentOverviewStats = overviewStatsDoc.data() || {};
-      const totalEntriesInDataset = (currentOverviewStats.totalEntriesInDataset || 1) - 1;
-      let fullyReviewedEntriesCount = currentOverviewStats.fullyReviewedEntriesCount || 0;
-
-      const adminSettingsRef = db.doc('admin_settings/global_config');
-      const adminSettingsDoc = await transaction.get(adminSettingsRef);
-      const adminSettings = adminSettingsDoc.data() as AdminSettingsData | undefined;
-      const targetReviews = adminSettings?.minTargetReviewsPerEntry || 10;
-
-      if (entryData.reviewCount >= targetReviews) {
-        fullyReviewedEntriesCount = (fullyReviewedEntriesCount > 0 ? fullyReviewedEntriesCount : 1) - 1;
-      }
-
-      transaction.update(overviewStatsRef, {
-        totalEntriesInDataset,
-        fullyReviewedEntriesCount,
-      });
 
       // 4. Logging
       const logRef = db.collection('activity_logs').doc();

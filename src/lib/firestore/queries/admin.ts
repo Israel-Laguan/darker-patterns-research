@@ -2,6 +2,7 @@
 import type { AdminEntriesFilter, AdminEntriesSortConfig } from '@/hooks/useAdminEntries';
 import { db } from '@/lib/firebase';
 import { getMockDashboardData, getMockStatisticsData } from '@/lib/firestore/mocks/admin';
+import { GlobalConfig } from '@/lib/firestore/schemas';
 import type { DPOEntry, EvaluationData, ParticipantFlag } from '@/types/dpo';
 import type { DisplayEntry } from '@/types/entries';
 import type { DemographicsSummary, OverviewStats, ResponseAggregates } from '@/types/stats';
@@ -21,23 +22,38 @@ import {
   type Query,
   type QueryDocumentSnapshot,
   startAfter,
+  Timestamp,
   updateDoc,
   where,
 } from 'firebase/firestore';
 import { notFound } from 'next/navigation';
 
-export interface AdminSettings {
-  minTargetReviewsPerEntry?: number;
-  // Add other admin settings as needed
-}
-
-export async function getAdminSettings(): Promise<AdminSettings> {
+export async function getGlobalConfig(): Promise<GlobalConfig<Date>> {
   if (!db) throw new Error('Firebase is not initialized');
 
-  const settingsDocRef = doc(db, 'admin_settings', 'global_config');
-  const settingsSnap = await getDoc(settingsDocRef);
+  const configDocRef = doc(db, 'admin_settings', 'global_config');
+  const configSnap = await getDoc(configDocRef);
 
-  return settingsSnap.exists() ? (settingsSnap.data() as AdminSettings) : {};
+  if (configSnap.exists()) {
+    const data = configSnap.data() as GlobalConfig<Timestamp>;
+
+    // Ensure all dates are properly converted to Date objects
+    return {
+      isSurveyActive: data.isSurveyActive ?? false,
+      targetReviews: data.targetReviews ?? 5,
+      updates: (data.updates || []).map((update) => ({
+        ...update,
+        date: update.date?.toDate?.() || new Date(),
+      })),
+    };
+  } else {
+    console.warn('getGlobalConfig: No global_config document found! Returning default data.');
+    return {
+      isSurveyActive: false,
+      targetReviews: 5,
+      updates: [],
+    };
+  }
 }
 
 export interface GetDpoEntryResult {
@@ -154,6 +170,9 @@ export function transformDpoEntry(doc: QueryDocumentSnapshot, targetReviews: num
   return {
     ...data,
     id: doc.id,
+    // Convert Firestore Timestamp to a serializable format (ISO string) so it can be
+    // passed from Server to Client Components.
+    date: data.date instanceof Timestamp ? data.date.toDate().toISOString() : data.date,
     reviewProgress,
     statusText: (data.reviewCount || 0) >= targetReviews ? 'Completed' : `${data.reviewCount || 0}/${targetReviews}`,
   } as DisplayEntry;
@@ -177,19 +196,10 @@ export async function fetchDpoEntriesData(mainQuery: Query, targetReviews: numbe
 }
 
 export async function getDashboardData() {
-  if (process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true') {
-    return getMockDashboardData();
-  }
-
   if (!db) {
     console.error('Firebase is not initialized.');
     // Return a default or empty state
-    return {
-      totalEntries: 0,
-      totalReviews: 0,
-      averageReviews: 0,
-      completionPercentage: 0,
-    };
+    return getMockDashboardData();
   }
 
   try {
@@ -234,17 +244,9 @@ export async function getDashboardData() {
 }
 
 export async function getStatisticsData() {
-  if (process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true') {
-    return getMockStatisticsData();
-  }
-
   if (!db) {
     console.error('Firebase is not initialized.');
-    return {
-      demographicsSummary: null,
-      overviewStats: null,
-      responseAggregates: null,
-    };
+    return getMockStatisticsData();
   }
 
   try {
