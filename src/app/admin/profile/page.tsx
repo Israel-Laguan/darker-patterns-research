@@ -8,24 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
-import { useAuth } from '@/hooks/useAuth';
-import { updateUserProfile } from '@/lib/firestore/mutations/users';
-import { fetchOrCreateUserProfile } from '@/lib/firestore/queries/users';
-import type { AppUser, UserProfileUpdateData } from '@/types/user';
-import { updateProfile } from 'firebase/auth';
-import { useEffect, useState, type ComponentPropsWithoutRef } from 'react';
-import { useForm, type FieldErrors, type UseFormHandleSubmit, type UseFormRegister } from 'react-hook-form';
-import { toast } from 'sonner';
-
-// Define a type for our form data to ensure type safety
-interface ProfileFormData {
-  displayName: string;
-  photoURL: string;
-  role: string;
-  bio: string;
-  linkedinUrl: string;
-  email: string; // read-only
-}
+import { type ComponentPropsWithoutRef } from 'react';
+import { type FieldErrors, type UseFormHandleSubmit, type UseFormRegister } from 'react-hook-form';
+import { useProfileForm, type ProfileFormData } from '@/hooks/useProfileForm';
+import type { AppUser } from '@/types/user';
 
 type ProfileFormInputProps = {
   id: keyof ProfileFormData;
@@ -118,77 +104,9 @@ const ProfileFormSkeleton = () => (
 );
 
 function ProfileForm() {
-  const { user, loading, refreshUser } = useAuth();
-  const [isSaving, setIsSaving] = useState(false);
-  const [fetching, setFetching] = useState(true);
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-    watch,
-  } = useForm<ProfileFormData>({
-    defaultValues: {
-      displayName: '',
-      photoURL: '',
-      role: '',
-      bio: '',
-      linkedinUrl: '',
-      email: '',
-    },
-  });
+  const { user, loading, isSaving, register, handleSubmit, errors, photoUrlValue, onSubmit } = useProfileForm();
 
-  const photoUrlValue = watch('photoURL');
-
-  useEffect(() => {
-    if (user) {
-      fetchOrCreateUserProfile(user)
-        .then((profile) => {
-          reset({
-            displayName: profile.displayName || '',
-            photoURL: profile.photoURL || '',
-            role: profile.role || '',
-            bio: profile.bio || '',
-            linkedinUrl: profile.linkedinUrl || '',
-            email: profile.email || '',
-          });
-        })
-        .catch(() => toast.error('Failed to fetch profile'))
-        .finally(() => setFetching(false));
-    } else if (!loading) {
-      setFetching(false);
-    }
-  }, [user, loading, reset]);
-
-  const onSubmit = async (data: ProfileFormData) => {
-    if (!user) return;
-    setIsSaving(true);
-    try {
-      await updateProfile(user, {
-        displayName: data.displayName,
-        photoURL: data.photoURL,
-      });
-
-      const firestoreUpdateData: UserProfileUpdateData = {
-        displayName: data.displayName,
-        photoURL: data.photoURL,
-        role: data.role,
-        bio: data.bio,
-        linkedinUrl: data.linkedinUrl,
-      };
-
-      await updateUserProfile(user.uid, firestoreUpdateData);
-      await refreshUser();
-      toast.success('Profile updated!');
-    } catch (error) {
-      console.error('Update failed:', error);
-      toast.error('Failed to update profile');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  if (loading || fetching) {
+  if (loading) {
     return <ProfileFormSkeleton />;
   }
 

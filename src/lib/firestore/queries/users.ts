@@ -2,7 +2,30 @@
 import { db } from '@/lib/firebase';
 import type { AppUser } from '@/types/user';
 import type { User as FirebaseUser } from 'firebase/auth';
-import { collection, doc, getDoc, getDocs, query, serverTimestamp, setDoc, where } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, query, serverTimestamp, setDoc, where, Timestamp } from 'firebase/firestore';
+
+// It's better to have this in a types file, but for now this clarifies the return type
+export interface UserProfile {
+  uid: string;
+  email?: string | null;
+  displayName?: string | null;
+  photoURL?: string | null;
+  roles: string[];
+  createdAt: Timestamp;
+  lastLoginAt: Timestamp;
+}
+
+export async function fetchUserProfile(userId: string): Promise<UserProfile | null> {
+  if (!db) throw new Error('Firebase is not initialized');
+  const userDocRef = doc(db, 'users', userId);
+  const userDocSnap = await getDoc(userDocRef);
+
+  if (userDocSnap.exists()) {
+    return userDocSnap.data() as UserProfile;
+  }
+
+  return null;
+}
 
 export async function fetchOrCreateUserProfile(firebaseUser: FirebaseUser): Promise<AppUser> {
   if (!db) throw new Error('Firebase is not initialized');
