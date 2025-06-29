@@ -1,5 +1,6 @@
 import { Toaster as SonnerToaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { CacheProvider } from '@/contexts/CacheContext';
 import { inter, lora, notoSans, openSans, spaceGrotesk } from '@/lib/fonts';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata } from 'next';
@@ -74,10 +75,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${inter.variable} ${spaceGrotesk.variable} ${notoSans.variable} ${lora.variable} ${openSans.variable} dark`}
-    >
+    <html lang="en">
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -87,10 +85,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
-      <body className="flex min-h-screen flex-col antialiased">
+      <body
+        className={`${inter.variable} ${spaceGrotesk.variable} ${notoSans.variable} ${lora.variable} ${openSans.variable} dark flex min-h-screen flex-col antialiased`}
+      >
         <AuthProvider>
-          {children}
-          <SonnerToaster richColors theme="dark" />
+          <CacheProvider>
+            {children}
+            <SonnerToaster richColors theme="dark" />
+          </CacheProvider>
         </AuthProvider>
         <SpeedInsights />
       </body>

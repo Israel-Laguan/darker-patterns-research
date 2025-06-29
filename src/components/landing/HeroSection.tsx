@@ -3,7 +3,8 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import CTAButton from './CTAButton';
 import { useEffect, useState } from 'react';
-import { getGlobalConfig } from '@/lib/firestore/queries/admin';
+import { useCache } from '@/contexts/CacheContext';
+import { cachedGetGlobalConfig } from '@/lib/cache/queries';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Lazy load the FloatingIcons component, and disable SSR since it's client-side only.
@@ -12,15 +13,16 @@ const FloatingIcons = dynamic(() => import('./FloatingIcons'), {
 });
 
 const HeroSection = () => {
+  const cache = useCache();
   const [isSurveyActive, setIsSurveyActive] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    getGlobalConfig().then((config) => {
+    cachedGetGlobalConfig(cache).then((config) => {
       setIsSurveyActive(config.isSurveyActive);
       setIsLoading(false);
     });
-  }, []);
+  }, [cache]);
 
   const startSurveyButton = (
     <CTAButton

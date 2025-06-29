@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 // src/lib/firestore/queries/admin.ts
 import type { AdminEntriesFilter, AdminEntriesSortConfig } from '@/hooks/useAdminEntries';
 import type { AdminSubmissionsFilter, AdminSubmissionsSortConfig } from '@/hooks/useAdminSubmissions';

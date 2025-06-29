@@ -1,7 +1,8 @@
 'use client';
 
 import EntryDetailPageContent from '@/components/admin/EntryDetailPageContent';
-import { getEntryDetails } from '@/lib/callable-functions';
+import { useCache } from '@/contexts/CacheContext';
+import { cachedGetEntryDetails } from '@/lib/cache/queries';
 import { incrementEntryViewCount } from '@/lib/firestore/queries/admin';
 import type { EntryWithDetails } from '@/types/entryDetails';
 import { notFound } from 'next/navigation';
@@ -12,6 +13,7 @@ interface EntryDetailPageViewProps {
 }
 
 export default function EntryDetailPageView({ entryId }: EntryDetailPageViewProps) {
+  const cache = useCache();
   const [entry, setEntry] = useState<EntryWithDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,15 +25,24 @@ export default function EntryDetailPageView({ entryId }: EntryDetailPageViewProp
         // Run these in parallel for better performance
         const [entryData] = await Promise.all([
           // Get entry details first
-          getEntryDetails(entryId),
+          cachedGetEntryDetails(entryId, cache),
           // Increment view count (fire and forget)
-          incrementEntryViewCount(entryId).catch(console.error),
+          incrementEntryViewCount(entryId).catch((err) => {
+            if (process.env.NODE_ENV !== 'production') {
+              console.error('Error incrementing entry view count:', err);
+            }
+          }),
         ]);
-        console.log('Entry data:', entryData);
+        if (process.env.NODE_ENV !== 'production') {
+          // eslint-disable-next-line no-console
+          console.log('Entry data:', entryData);
+        }
         setEntry(entryData);
         setError(null);
       } catch (err) {
-        console.error('Error fetching entry details:', err);
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('Error fetching entry details:', err);
+        }
         setError('Failed to load entry details.');
       } finally {
         setLoading(false);
@@ -41,7 +52,7 @@ export default function EntryDetailPageView({ entryId }: EntryDetailPageViewProp
     if (entryId) {
       fetchEntryData();
     }
-  }, [entryId]);
+  }, [entryId, cache]);
 
   if (loading) {
     return <div>Loading entry...</div>;

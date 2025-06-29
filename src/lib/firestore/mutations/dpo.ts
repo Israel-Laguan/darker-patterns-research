@@ -1,6 +1,16 @@
 import { auth, db } from '@/lib/firebase';
+import { serverCache } from '@/lib/cache/server';
 import type { DPOEntry, DPORevision, ParticipantFlag } from '@/types/dpo';
-import { addDoc, collection, doc, increment, runTransaction, serverTimestamp, updateDoc } from 'firebase/firestore';
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  increment,
+  runTransaction,
+  serverTimestamp,
+  updateDoc,
+} from 'firebase/firestore';
 
 export const addDPOEntry = async (entry: Omit<DPOEntry, 'id'>) => {
   if (!db) {
@@ -37,6 +47,12 @@ export const updateDPOEntry = async (entryId: string, entry: Partial<DPOEntry>) 
       ...entry,
       updatedAt: serverTimestamp(),
     });
+
+    // Invalidate both the main entry and the detailed entry caches
+    await Promise.all([
+      serverCache.invalidateByPattern(`dpo-entry-${entryId}`),
+      serverCache.invalidateByPattern(`entry-details-${entryId}`),
+    ]);
   } catch (error) {
     console.error('Error updating DPO entry: ', error);
     throw new Error('Failed to update DPO entry in the database.');
@@ -46,6 +62,7 @@ export const updateDPOEntry = async (entryId: string, entry: Partial<DPOEntry>) 
 export const reviseDpoEntry = async (
   originalEntryId: string,
   proposedChanges: Partial<DPOEntry>,
+  submissionId?: string,
 ): Promise<{ success: boolean; revisionId?: string; message: string }> => {
   if (!db || !auth || !auth.currentUser) {
     return {
@@ -56,6 +73,7 @@ export const reviseDpoEntry = async (
 
   const revisionData: Omit<DPORevision, 'id'> = {
     originalEntryId,
+    ...(submissionId && { submissionId }),
     proposedChanges,
     submittedBy: auth.currentUser.uid,
     submittedAt: serverTimestamp(),
@@ -83,8 +101,17 @@ export const approveRevision = async (revisionId: string) => {
   const revisionRef = doc(firestoreDb, 'dpo_revisions', revisionId);
 
   try {
+    // We need the original entry ID and potential submission ID after the transaction to invalidate caches.
+    // We fetch them before the transaction to avoid an extra read if the transaction fails.
+    const revisionDocBefore = await getDoc(revisionRef);
+    if (!revisionDocBefore.exists()) {
+      throw new Error('Revision not found.');
+    }
+    const revisionDataBefore = revisionDocBefore.data() as DPORevision;
+    const { originalEntryId, submissionId } = revisionDataBefore;
+
     await runTransaction(firestoreDb, async (transaction) => {
-      const revisionDoc = await transaction.get(revisionRef);
+      const revisionDoc = await transaction.get(revisionRef); // Re-get inside transaction
       if (!revisionDoc.exists() || revisionDoc.data().status !== 'pending') {
         throw new Error('Revision not found or already reviewed.');
       }
@@ -92,17 +119,42 @@ export const approveRevision = async (revisionId: string) => {
       const revisionData = revisionDoc.data() as DPORevision;
       const entryRef = doc(firestoreDb, 'dpo_entries', revisionData.originalEntryId);
 
+      // 1. Update the original DPO entry with the proposed changes
       transaction.update(entryRef, {
         ...revisionData.proposedChanges,
         updatedAt: serverTimestamp(),
       });
 
+      // 2. Update the revision status to 'approved'
       transaction.update(revisionRef, {
         status: 'approved',
         reviewedBy: currentUser.uid,
         reviewedAt: serverTimestamp(),
       });
+
+      // 3. If a submission is linked, update its status to 'resolved'
+      if (revisionData.submissionId) {
+        const submissionRef = doc(firestoreDb, 'participant_flags', revisionData.submissionId);
+        transaction.update(submissionRef, {
+          status: 'resolved',
+          remediatedBy: currentUser.uid,
+          remediatedAt: serverTimestamp(),
+        });
+      }
     });
+
+    // Invalidate all relevant caches after the transaction is successful
+    const invalidationPromises = [
+      serverCache.invalidateByPattern(`dpo-entry-${originalEntryId}`),
+      serverCache.invalidateByPattern(`entry-details-${originalEntryId}`),
+      serverCache.invalidateByPattern(`revision-${revisionId}`),
+    ];
+
+    if (submissionId) {
+      invalidationPromises.push(serverCache.invalidateByPattern(`submission-${submissionId}`));
+    }
+    await Promise.all(invalidationPromises);
+
     return { success: true, message: 'Revision approved and entry updated.' };
   } catch (error) {
     console.error('Error approving revision:', error);

@@ -25,7 +25,29 @@ export const CACHE_TTL_MAP: Record<CacheLevel, number> = {
 /**
  * Represents the structure of an entry in the IndexedDB cache.
  */
-export interface CacheEntry<T = any> {
+/**
+ * Defines the standard interface for a cache manager, whether client-side or server-side.
+ */
+/**
+ * Extends the base CacheManager with client-side specific properties and methods.
+ */
+export interface CacheContextValue extends CacheManager {
+  cleanupExpired: () => Promise<void>;
+  cleanupByLevel: (level: CacheLevel) => Promise<void>;
+  isReady: boolean;
+  error: Error | null;
+}
+
+export interface CacheManager {
+  get: <T>(key: string) => Promise<T | null>;
+  set: <T>(key: string, data: T, level?: CacheLevel, customTtlMs?: number) => Promise<void>;
+  invalidateByPattern: (pattern: string) => Promise<void>;
+}
+
+/**
+ * Represents the structure of an entry in the IndexedDB cache.
+ */
+export interface CacheEntry<T = unknown> {
   key: string;
   data: T;
   createdAt: number;

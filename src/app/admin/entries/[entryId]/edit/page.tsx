@@ -1,16 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useCache } from '@/contexts/CacheContext';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { DPOEntryForm } from '@/components/admin/DPOEntryForm';
 import { DPOEntry } from '@/types/dpo';
-import { getDpoEntry } from '@/lib/firestore/queries/admin';
+import { cachedGetDpoEntry } from '@/lib/cache/queries';
 import { reviseDpoEntry, updateDPOEntry } from '@/lib/firestore/mutations/dpo';
 
 export default function EditDPOEntryPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const params = useParams();
   const entryId = params.entryId as string;
+  const cache = useCache();
 
   const [entry, setEntry] = useState<DPOEntry | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -18,7 +21,7 @@ export default function EditDPOEntryPage() {
 
   useEffect(() => {
     if (entryId) {
-      getDpoEntry(entryId)
+      cachedGetDpoEntry(entryId, cache)
         .then(({ entry: fetchedEntry }) => {
           if (fetchedEntry) {
             setEntry(fetchedEntry);
@@ -35,13 +38,15 @@ export default function EditDPOEntryPage() {
           setIsLoading(false);
         });
     }
-  }, [entryId, router]);
+  }, [entryId, cache, router]);
 
   const handleSubmit = async (updatedEntry: Partial<DPOEntry>, isRevision: boolean) => {
+    if (!cache) return;
     setIsSubmitting(true);
     try {
       if (isRevision) {
-        const result = await reviseDpoEntry(entryId, updatedEntry);
+        const submissionId = searchParams.get('from_submission');
+        const result = await reviseDpoEntry(entryId, updatedEntry, submissionId ?? undefined);
         if (result.success) {
           alert('Your revision has been submitted for review.');
           router.push('/admin/entries');
@@ -50,6 +55,10 @@ export default function EditDPOEntryPage() {
         }
       } else {
         await updateDPOEntry(entryId, updatedEntry);
+        await Promise.all([
+          cache.invalidateByPattern(`dpo-entry-${entryId}`),
+          cache.invalidateByPattern(`entry-details-${entryId}`),
+        ]);
         router.push(`/admin/entries/${entryId}`);
       }
     } catch (error) {

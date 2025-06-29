@@ -13,7 +13,7 @@ import { EntryEvaluations } from './EntryDetail/EntryEvaluations';
 import { EntryOriginalData } from './EntryDetail/EntryOriginalData';
 import { FlagEntryModal } from './EntryDetail/FlagEntryModal';
 import { RevisionInfoBanner } from './EntryDetail/RevisionInfoBanner';
-import { RemediationBanner } from './EntryDetail/RemediationBanner';
+import RemediationBanner from './EntryDetail/RemediationBanner';
 import type { EntryDetailPageContentProps } from './EntryDetailPageContent.types';
 
 const EntryDetailPageContent: React.FC<EntryDetailPageContentProps> = ({ entry }) => {

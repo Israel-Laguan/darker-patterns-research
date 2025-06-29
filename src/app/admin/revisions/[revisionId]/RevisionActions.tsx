@@ -2,16 +2,20 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useCache } from '@/contexts/CacheContext';
 import { approveRevision, rejectRevision } from '@/lib/firestore/mutations/dpo';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 interface RevisionActionsProps {
   revisionId: string;
+  originalEntryId: string;
+  submissionId?: string;
 }
 
-export default function RevisionActions({ revisionId }: RevisionActionsProps) {
+export default function RevisionActions({ revisionId, originalEntryId, submissionId }: RevisionActionsProps) {
   const router = useRouter();
+  const cache = useCache();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleApprove = async () => {
@@ -21,6 +25,19 @@ export default function RevisionActions({ revisionId }: RevisionActionsProps) {
       toast.success('Revision Approved', {
         description: 'The entry has been updated successfully.',
       });
+
+      if (cache) {
+        const invalidationPromises = [
+          cache.invalidateByPattern(`dpo-entry-${originalEntryId}`),
+          cache.invalidateByPattern(`entry-details-${originalEntryId}`),
+          cache.invalidateByPattern(`revision-${revisionId}`),
+        ];
+        if (submissionId) {
+          invalidationPromises.push(cache.invalidateByPattern(`submission-${submissionId}`));
+        }
+        await Promise.all(invalidationPromises);
+      }
+
       router.push('/admin/revisions');
       router.refresh();
     } else {

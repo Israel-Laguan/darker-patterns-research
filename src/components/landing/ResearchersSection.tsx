@@ -1,10 +1,10 @@
 // src/components/landing/ResearchersSection.tsx
 import Link from 'next/link';
-import { fetchAllResearchers } from '@/lib/firestore/queries/users';
+import { cachedFetchAllResearchers } from '@/lib/cache/queries';
 import ResearcherCard from './ResearcherCard';
 
 const ResearchersSection = async () => {
-  const allResearchers = await fetchAllResearchers();
+  const allResearchers = await cachedFetchAllResearchers();
   const featuredResearchers = allResearchers.slice(0, 3);
 
   return (

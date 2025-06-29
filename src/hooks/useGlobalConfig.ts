@@ -1,24 +1,28 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getGlobalConfig } from '@/lib/firestore/queries/admin';
+import { useCache } from '@/contexts/CacheContext';
+import { cachedGetGlobalConfig } from '@/lib/cache/queries';
 import { updateGlobalConfig } from '@/lib/firestore/mutations/admin';
 import { GlobalConfig } from '@/lib/firestore/schemas';
 
 export const useGlobalConfig = () => {
+  const cache = useCache();
   const [config, setConfig] = useState<GlobalConfig<Date> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    getGlobalConfig().then((data) => {
+    cachedGetGlobalConfig(cache).then((data) => {
       setConfig(data);
       setIsLoading(false);
     });
-  }, []);
+  }, [cache]);
 
   const saveConfig = async (configToSave: GlobalConfig<Date>) => {
     await updateGlobalConfig(configToSave);
+    // Invalidate the cache to ensure fresh data is fetched next time
+    await cache.invalidateByPattern('globalConfig');
     setConfig(configToSave);
   };
 

@@ -105,6 +105,7 @@ export interface ParticipantSession {
 export interface DPORevision {
   id: string;
   originalEntryId: string;
+  submissionId?: string; // The ID of the submission that prompted this revision
   submittedBy: string; // UID of the user who submitted the revision
   submittedAt: Timestamp | Date | FieldValue;
   status: 'pending' | 'approved' | 'rejected';

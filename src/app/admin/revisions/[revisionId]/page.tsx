@@ -1,4 +1,5 @@
-import { getDpoEntry, getRevisionById } from '@/lib/firestore/queries/admin';
+import { cachedGetRevisionById } from '@/lib/cache/queries';
+import { cachedGetDpoEntry } from '@/lib/cache/queries';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import RevisionActions from './RevisionActions';
@@ -57,13 +58,13 @@ const DiffViewer = ({ original, revised }: { original: DPOEntry; revised: Partia
 
 export default async function RevisionDetailPage({ params }: PageProps) {
   const { revisionId } = params;
-  const revision = await getRevisionById(revisionId);
+  const revision = await cachedGetRevisionById(revisionId);
 
   if (!revision) {
     notFound();
   }
 
-  const { entry: originalEntry } = await getDpoEntry(revision.originalEntryId);
+  const { entry: originalEntry } = await cachedGetDpoEntry(revision.originalEntryId);
 
   if (!originalEntry) {
     return (
@@ -83,7 +84,11 @@ export default async function RevisionDetailPage({ params }: PageProps) {
         </CardHeader>
         <CardContent>
           <DiffViewer original={originalEntry} revised={revision.proposedChanges} />
-          <RevisionActions revisionId={revision.id} />
+          <RevisionActions
+            revisionId={revision.id}
+            originalEntryId={revision.originalEntryId}
+            submissionId={revision.submissionId}
+          />
         </CardContent>
       </Card>
     </div>

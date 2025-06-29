@@ -45,7 +45,7 @@ export function UserProfile({ userId }: UserProfileProps) {
         <strong>Email:</strong> {user.email}
       </p>
       <p>
-        <strong>Role:</strong> {user.role}
+        <strong>Role:</strong> {user.roles?.join(', ')}
       </p>
     </div>
   );

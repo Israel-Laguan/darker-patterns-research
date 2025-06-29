@@ -1,12 +1,14 @@
 'use client';
 
 import { functions } from '@/lib/firebase';
-import { getGlobalConfig } from '@/lib/firestore/queries/admin';
+import { useCache } from '@/contexts/CacheContext';
+import { cachedGetGlobalConfig } from '@/lib/cache/queries';
 import { ingestDpoDataset } from '@/lib/firestore/mutations/admin';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export function useAdminPageSetup() {
+  const cache = useCache();
   const [defaultTargetReviews, setDefaultTargetReviews] = useState(10);
   const [initialDataLoading, setInitialDataLoading] = useState(true);
   const [isIngesting, setIsIngesting] = useState(false);
@@ -17,7 +19,7 @@ export function useAdminPageSetup() {
     const fetchInitialSetupData = async () => {
       setInitialDataLoading(true);
       try {
-        const config = await getGlobalConfig();
+        const config = await cachedGetGlobalConfig(cache);
         if (config.targetReviews) {
           setDefaultTargetReviews(config.targetReviews);
         }
@@ -30,7 +32,7 @@ export function useAdminPageSetup() {
     };
 
     fetchInitialSetupData();
-  }, []);
+  }, [cache]);
 
   const handleIngestSubmit = async (fileContent: string) => {
     if (!functions) {

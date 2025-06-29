@@ -2,7 +2,7 @@ import type { LandingUpdate } from '@/components/landing/types';
 import { db } from '@/lib/firebase';
 import type { LandingStats, ResponseAggregates } from '@/types/stats';
 import { doc, getDoc } from 'firebase/firestore';
-import { getGlobalConfig } from './admin';
+import { cachedGetGlobalConfig } from '@/lib/cache/queries';
 
 // Mock data for test environment or if Firestore fetch fails
 const mockStatsData: LandingStats = {
@@ -100,7 +100,7 @@ export async function getProjectProgress(): Promise<{ label: string; percentage:
 
 export async function getLandingUpdates(): Promise<LandingUpdate[]> {
   try {
-    const config = await getGlobalConfig();
+    const config = await cachedGetGlobalConfig();
     const landingUpdates: LandingUpdate[] = config.updates.map((update, index) => ({
       id: `update-${index}`,
       title: update.title,

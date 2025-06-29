@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getSubmissionById } from '@/lib/firestore/queries/admin';
+import { useCache } from '@/contexts/CacheContext';
+import { cachedGetSubmissionById } from '@/lib/cache/queries';
 import type { DisplaySubmission } from '@/types/submissions';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
@@ -11,7 +12,8 @@ interface RemediationBannerProps {
   submissionId: string;
 }
 
-export function RemediationBanner({ submissionId }: RemediationBannerProps) {
+export default function RemediationBanner({ submissionId }: RemediationBannerProps) {
+  const cache = useCache();
   const [submission, setSubmission] = useState<DisplaySubmission | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +21,7 @@ export function RemediationBanner({ submissionId }: RemediationBannerProps) {
   useEffect(() => {
     async function fetchSubmission() {
       try {
-        const sub = await getSubmissionById(submissionId);
+        const sub = await cachedGetSubmissionById(submissionId, cache);
         if (sub) {
           setSubmission(sub);
         } else {
@@ -34,7 +36,7 @@ export function RemediationBanner({ submissionId }: RemediationBannerProps) {
     }
 
     fetchSubmission();
-  }, [submissionId]);
+  }, [submissionId, cache]);
 
   if (isLoading) {
     return (

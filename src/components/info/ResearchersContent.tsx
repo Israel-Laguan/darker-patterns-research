@@ -1,4 +1,4 @@
-import { fetchAllResearchers } from '@/lib/firestore/queries/users';
+import { cachedFetchAllResearchers } from '@/lib/cache/queries';
 import type { AppUser } from '@/types/user';
 import { Linkedin, Mail, UserCircle2 } from 'lucide-react';
 import Link from 'next/link';
@@ -55,7 +55,7 @@ const ResearcherProfileCard: React.FC<ResearcherProfileProps> = ({ name, role, b
 };
 
 const ResearchersContent = async () => {
-  const researchers: AppUser[] = await fetchAllResearchers();
+  const researchers: AppUser[] = await cachedFetchAllResearchers();
 
   return (
     <div className="survey-page-container">
