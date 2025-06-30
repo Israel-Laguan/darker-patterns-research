@@ -5,25 +5,27 @@ import type React from 'react';
 export type { ChartConfig }; // Re-exporting
 
 export const chartColors = [
-  'oklch(0.627 0.265 303.9)',
-  'oklch(0.715 0.143 215.221)',
-  'oklch(0.606 0.25 292.717)',
-  'oklch(0.656 0.241 354.308)',
+  '#4f46e5', // indigo-600
+  '#10b981', // emerald-500
+  '#f59e0b', // amber-500
+  '#ef4444', // red-500
+  '#8b5cf6', // violet-500
+  '#06b6d4', // cyan-500
+  '#f97316', // orange-500
+  '#ec4899', // pink-500
 ];
 
 export interface ChartDataItem {
   name: string;
   fill: string;
-  value?: number;
-  count?: number;
   [key: string]: string | number | undefined;
 }
 
-export interface PieChartData extends Omit<ChartDataItem, 'value'> {
+export interface PieChartData extends ChartDataItem {
   value: number;
 }
 
-export interface BarChartData extends Omit<ChartDataItem, 'count'> {
+export interface BarChartData extends ChartDataItem {
   count: number;
 }
 

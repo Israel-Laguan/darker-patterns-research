@@ -26,11 +26,11 @@ export default function ResponseAnalyticsDisplay({ overviewStats, responseAggreg
   const agreementRate = overviewStats?.agreementRate;
   const commentRate = responseAggregates?.commentSubmissionRatePercent;
 
-  const agreementChartData = createPieChartData(agreementRate, 'Agreed', 'Disagreed', '#82ca9d', '#ff8042');
-  const agreementChartConfig = createPieChartConfig('Agreed', 'Disagreed', '#82ca9d', '#ff8042');
+  const agreementChartData = createPieChartData(agreementRate, 'Agreed', 'Disagreed', '#10b981', '#ef4444');
+  const agreementChartConfig = createPieChartConfig('Agreed', 'Disagreed', '#10b981', '#ef4444');
 
-  const commentChartData = createPieChartData(commentRate, 'With Comment', 'No Comment', '#82ca9d', '#ff8042');
-  const commentChartConfig = createPieChartConfig('With Comment', 'No Comment', '#82ca9d', '#ff8042');
+  const commentChartData = createPieChartData(commentRate, 'With Comment', 'No Comment', '#4f46e5', '#94a3b8');
+  const commentChartConfig = createPieChartConfig('With Comment', 'No Comment', '#4f46e5', '#94a3b8');
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

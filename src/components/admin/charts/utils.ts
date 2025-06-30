@@ -1,27 +1,23 @@
 // src/components/admin/charts/utils.ts
 'use client';
 
-import { chartColors, ChartDataItem, type ChartConfig } from '@/types/charts';
+import { chartColors, type ChartConfig, type ChartDataItem, type PieChartData } from '@/types/charts';
 import { DemographicsDistribution } from '@/types/stats';
 
-export function transformDistributionData(
-  distribution: DemographicsDistribution | undefined,
-  nameKey: string = 'name',
-  valueKey: string = 'count',
-) {
+export function transformDistributionData(distribution: DemographicsDistribution | undefined): PieChartData[] {
   if (!distribution) return [];
   return Object.entries(distribution)
     .map(([name, value], index) => ({
-      [nameKey]: name,
-      [valueKey]: value,
+      name,
+      value,
       fill: chartColors[index % chartColors.length],
     }))
-    .sort((a, b) => Number(b[valueKey]) - Number(a[valueKey]));
+    .sort((a, b) => b.value - a.value);
 }
 
-export function createChartConfig(data: ChartDataItem[], nameField: string) {
+export function createChartConfig(data: ChartDataItem[], nameField: string, valueField: string = 'value'): ChartConfig {
   const config: { [key: string]: { label: string; color?: string } } = {
-    count: { label: 'Participants', color: '#82ca9d' },
+    [valueField]: { label: 'Count', color: '#82ca9d' },
   };
   data.forEach((item) => {
     const key = item[nameField];
