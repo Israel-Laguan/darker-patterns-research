@@ -1,16 +1,15 @@
 // components/admin/AdminStatisticsContent.tsx
-import { getStatisticsData } from '@/lib/firestore/queries/admin';
-import AdminHeader from './AdminHeader';
-import DemographicsDisplayAdmin from './DemographicsDisplayAdmin';
-import ResponseAnalyticsDisplay from './ResponseAnalyticsDisplay';
-import ExportDpoDatasetButton from './ExportDpoDatasetButton';
-import { ContentCard } from './ContentCard';
 import ProjectProgressChart from '@/components/admin/charts/ProjectProgressChart';
-import { getDashboardData } from '@/lib/firestore/queries/dashboard';
+import { cachedGetDashboardData, cachedGetStatisticsData } from '@/lib/cache/queries';
+import AdminHeader from './AdminHeader';
+import { ContentCard } from './ContentCard';
+import DemographicsDisplayAdmin from './DemographicsDisplayAdmin';
+import ExportDpoDatasetButton from './ExportDpoDatasetButton';
+import ResponseAnalyticsDisplay from './ResponseAnalyticsDisplay';
 
 const AdminStatisticsContent = async () => {
-  const { demographicsSummary, overviewStats, responseAggregates } = await getStatisticsData();
-  const { projectProgress } = await getDashboardData();
+  const { demographicsSummary, overviewStats, responseAggregates } = await cachedGetStatisticsData();
+  const { projectProgress } = await cachedGetDashboardData();
 
   return (
     <>

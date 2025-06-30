@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 // src/hooks/useCacheDatabase.ts
 import { CACHE_TTL_MAP, CacheEntry, CacheLevel } from '@/lib/cache/types';
 import Dexie, { Table } from 'dexie';
@@ -171,9 +172,35 @@ function useCacheMethods(
     [dbRef, handleCacheError],
   );
 
+  const getOrSet = useCallback(
+    async <T>(
+      key: string,
+      setter: () => Promise<T>,
+      level: CacheLevel = CacheLevel.STANDARD,
+      customTtlMs?: number,
+    ): Promise<T> => {
+      const existing = await get<T>(key);
+      if (existing !== null && existing !== undefined) {
+        return existing;
+      }
+      const value = await setter();
+      await set<T>(key, value, level, customTtlMs);
+      return value;
+    },
+    [get, set],
+  );
+
   return useMemo(
-    () => ({ get, set, invalidate, invalidateByPattern, cleanupExpired, cleanupByLevel }),
-    [set, get, invalidate, invalidateByPattern, cleanupExpired, cleanupByLevel],
+    () => ({
+      get,
+      set,
+      invalidate,
+      invalidateByPattern,
+      cleanupExpired,
+      cleanupByLevel,
+      getOrSet,
+    }),
+    [set, get, invalidate, invalidateByPattern, cleanupExpired, cleanupByLevel, getOrSet],
   );
 }
 

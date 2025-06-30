@@ -8,12 +8,12 @@ import DemographicsCharts from '@/components/admin/charts/DemographicsCharts';
 
 import StatCardAdmin from '@/components/admin/StatCardAdmin';
 import { Card, CardContent } from '@/components/ui/card';
-import { getDashboardData } from '@/lib/firestore/queries/dashboard';
+import { cachedGetDashboardData } from '@/lib/cache/queries';
 
 export const metadata: Metadata = { title: 'Project Overview - DPO Admin' };
 
 const AdminDashboardPage = async () => {
-  const dashboardData = await getDashboardData();
+  const dashboardData = await cachedGetDashboardData();
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:p-8">

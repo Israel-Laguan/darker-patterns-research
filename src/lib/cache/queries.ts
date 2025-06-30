@@ -3,17 +3,19 @@ import { CacheContextValue, CacheManager } from '@/lib/cache/types';
 import { getEntryDetails } from '@/lib/callable-functions';
 import {
   getDpoEntry,
+  GetDpoEntryResult,
   getGlobalConfig,
   getRevisionById,
+  getStatisticsData,
   getSubmissionById,
-  GetDpoEntryResult,
 } from '@/lib/firestore/queries/admin';
+import { getDashboardData } from '@/lib/firestore/queries/dashboard';
 import { fetchAllResearchers } from '@/lib/firestore/queries/users';
-import { DPORevision } from '@/types/dpo';
-import { DisplaySubmission } from '@/types/submissions';
-import { EntryWithDetails } from '@/types/entryDetails';
-import { AppUser } from '@/types/user';
 import { GlobalConfig } from '@/lib/firestore/schemas';
+import { DPORevision } from '@/types/dpo';
+import { EntryWithDetails } from '@/types/entryDetails';
+import { DisplaySubmission } from '@/types/submissions';
+import { AppUser } from '@/types/user';
 import { serverCache } from './server';
 import { CacheLevel } from './types';
 
@@ -72,3 +74,23 @@ export const cachedGetEntryDetails = (entryId: string, cache?: CacheContextValue
 
 export const cachedFetchAllResearchers = (cache?: CacheContextValue): Promise<AppUser[]> =>
   withCache(fetchAllResearchers, 'all-researchers', CacheLevel.PERSISTENT, cache);
+
+export const cachedGetStatisticsData = async () => {
+  const cacheKey = 'statistics-data';
+  return serverCache.getOrSet(
+    cacheKey,
+    getStatisticsData,
+    CacheLevel.STANDARD,
+    1000 * 60 * 60, // 1 hour
+  );
+};
+
+export const cachedGetDashboardData = async () => {
+  const cacheKey = 'dashboard-data';
+  return serverCache.getOrSet(
+    cacheKey,
+    getDashboardData,
+    CacheLevel.STANDARD,
+    1000 * 60 * 60, // 1 hour
+  );
+};

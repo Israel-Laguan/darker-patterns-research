@@ -62,6 +62,30 @@ class ServerCache implements CacheManager {
       }
     }
   }
+
+  async getOrSet<T>(
+    key: string,
+    setter: () => Promise<T>,
+    level: CacheLevel = CacheLevel.STANDARD,
+    customTtlMs?: number,
+  ): Promise<T> {
+    const cached = await this.get<T>(key);
+    if (cached) {
+      if (process.env.NODE_ENV !== 'production') {
+        // eslint-disable-next-line no-console
+        console.log(`[Server Cache] HIT: ${key}`);
+      }
+      return cached;
+    }
+
+    if (process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.log(`[Server Cache] MISS: ${key}`);
+    }
+    const value = await setter();
+    await this.set(key, value, level, customTtlMs);
+    return value;
+  }
 }
 
 // In development, use the global object to preserve the cache instance across hot reloads.
