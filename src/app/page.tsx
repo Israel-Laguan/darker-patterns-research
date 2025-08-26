@@ -1,7 +1,5 @@
 // src/app/page.tsx
-import DarkFooter from '@/components/landing/DarkFooter';
-import DarkNavbar from '@/components/landing/DarkNavbar';
-import LandingPageContent from '@/components/landing/LandingPageContent';
+import ModernLandingPage from '@/components/landing/ModernLandingPage';
 import type { Metadata } from 'next';
 
 // Metadata for the root landing page
@@ -14,11 +12,7 @@ export const metadata: Metadata = {
 export default function RootPage() {
   return (
     <>
-      <DarkNavbar />
-      <main>
-        <LandingPageContent />
-      </main>
-      <DarkFooter />
+      <ModernLandingPage />
     </>
   );
 }
