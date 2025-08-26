@@ -239,3 +239,4 @@ Refer to the [Firebase CLI Setup and Deployment Guide](./docs/firebase-cli-setup
   - **A3: Restart Dev Server:** After significant Tailwind config changes, restarting the Next.js development server is often necessary.
 
 ## Contributing
+Shadcn Landing Page Remaster - [Wadood Ahmed Taibek](https://github.com/wadoodt)
