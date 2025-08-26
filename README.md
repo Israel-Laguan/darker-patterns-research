@@ -207,14 +207,12 @@ Refer to the [Firebase CLI Setup and Deployment Guide](./docs/firebase-cli-setup
 ## Frequently Asked Questions (FAQs)
 
 - **Q: I'm getting Firebase errors like "Missing or insufficient permissions" or "API key not valid."**
-
   - **A1: Check Environment Variables:** Ensure your `.env.local` file has the correct Firebase Web App configuration keys from your Firebase project settings and that they are prefixed with `NEXT_PUBLIC_`.
   - **A2: Firebase Project Setup:** Verify that you have created a Web App in your Firebase project and that the services you're trying to use (Authentication, Firestore, Storage, Functions) are enabled in the Firebase Console.
   - **A3: Firestore Rules:** For Firestore, ensure your security rules allow read/write access as needed, especially during development. Default test mode rules are permissive, but production rules should be secure.
   - **A4: API Key Restrictions:** If you have restricted your API key in the Google Cloud Console, ensure it allows access from `localhost` (for development) and your deployed app's domain.
 
 - **Q: My Firebase Functions are not deploying or are showing errors in the logs.**
-
   - **A1: Blaze Plan:** Firebase Functions (outside the free tier/emulation) require your Firebase project to be on the Blaze (pay-as-you-go) plan.
   - **A2: Node.js Version:** Ensure the Node.js version specified in your `functions/package.json` (e.g., `"engines": { "node": "18" }`) is compatible with your function code and supported by Firebase.
   - **A3: Dependencies:** Make sure all dependencies in `functions/package.json` are installed correctly (`npm install` inside the `functions` directory).
@@ -222,15 +220,12 @@ Refer to the [Firebase CLI Setup and Deployment Guide](./docs/firebase-cli-setup
   - **A5: IAM Permissions:** The service account used by functions (usually `[PROJECT_ID]@appspot.gserviceaccount.com`) needs appropriate IAM roles to access other Firebase services (e.g., "Firebase Admin SDK Administrator Service Agent" or more granular permissions like "Cloud Datastore User" for Firestore).
 
 - **Q: How do I run Firebase Functions locally for testing?**
-
   - **A:** Use the Firebase Emulator Suite: `firebase emulators:start`. You'll need to initialize it first with `firebase init emulators` and select Functions, Firestore, Auth, etc. Your application can then be configured to connect to these local emulators.
 
 - **Q: Data in `cached_statistics` is not updating.**
-
   - **A:** Ensure the Firebase Functions responsible for aggregation (e.g., `onNewEvaluationUpdateStats`) are deployed and do not have errors in their logs. Verify the triggers are set up correctly for the relevant Firestore collections/documents.
 
 - **Q: Admin exports are failing with "permission-denied."**
-
   - **A:** The `exportData` Firebase Function checks for an `admin: true` custom claim on the authenticated user. Ensure the admin user you are testing with has this claim set. Refer to the [Setting Admin Custom Claims Guide](./docs/firebase-set-admin-claims.md).
 
 - **Q: My Tailwind CSS styles are not applying correctly or are missing.**
@@ -239,3 +234,5 @@ Refer to the [Firebase CLI Setup and Deployment Guide](./docs/firebase-cli-setup
   - **A3: Restart Dev Server:** After significant Tailwind config changes, restarting the Next.js development server is often necessary.
 
 ## Contributing
+
+Shadcn Landing Page - [Wadood Ahmed Taibek](https://github.com/wadoodt)
