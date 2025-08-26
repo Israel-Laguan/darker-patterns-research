@@ -235,4 +235,4 @@ Refer to the [Firebase CLI Setup and Deployment Guide](./docs/firebase-cli-setup
 
 ## Contributing
 
-Shadcn Landing Page - [Wadood Ahmed Taibek](https://github.com/wadoodt)
+Shadcn Landing Page Remaster - [Wadood Ahmed Taibek](https://github.com/wadoodt)
